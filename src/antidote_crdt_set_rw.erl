@@ -51,6 +51,7 @@
           to_binary/1,
           from_binary/1,
           is_operation/1,
+          is_bottom/1,
           require_state_downstream/1
         ]).
 
@@ -191,7 +192,12 @@ is_operation({remove, _Elem}) ->
     true;
 is_operation({remove_all, L}) when is_list(L) -> true;
 is_operation({reset, {}}) -> true;
+is_operation(is_bottom) -> true;
 is_operation(_) -> false.
+
+is_bottom(RWSet) ->
+  % RWSet == orddict:new().
+  value(RWSet) == [].
 
 require_state_downstream(_) -> true.
 
