@@ -196,8 +196,7 @@ is_operation(is_bottom) -> true;
 is_operation(_) -> false.
 
 is_bottom(RWSet) ->
-  % RWSet == orddict:new().
-  value(RWSet) == [].
+  RWSet == new().
 
 require_state_downstream(_) -> true.
 
