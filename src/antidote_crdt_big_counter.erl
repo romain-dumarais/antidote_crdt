@@ -36,6 +36,7 @@
           to_binary/1,
           from_binary/1,
           is_operation/1,
+          is_bottom/1,
           require_state_downstream/1
         ]).
 
@@ -120,6 +121,8 @@ to_binary(BigCtr) ->
 from_binary(<<?TAG:8/integer, ?V1_VERS:8/integer, Bin/binary>>) ->
     {ok, riak_dt:from_binary(Bin)}.
 
+is_bottom(BigCtr) ->
+  BigCtr == new().
 
 %% @doc The following operation verifies
 %%      that Operation is supported by this particular CRDT.
@@ -129,6 +132,7 @@ is_operation(decrement) -> true;
 is_operation({increment, Value}) when is_integer(Value) -> true;
 is_operation({decrement, Value}) when is_integer(Value)-> true;
 is_operation({reset, {}}) -> true;
+is_operation(is_bottom) -> true;
 is_operation(_) -> false.
 
 require_state_downstream(_) ->
