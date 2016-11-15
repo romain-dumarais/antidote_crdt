@@ -145,7 +145,9 @@ unique() ->
 
 -spec update(downstream_op(), set()) -> {ok, set()}.
   update(DownstreamOp, RWSet) ->
-    {ok, apply_downstreams(DownstreamOp, RWSet)}.
+    RWSet1 = apply_downstreams(DownstreamOp, RWSet),
+    RWSet2 = [Entry || {_, {AddTokens, RemoveTokens}} = Entry <- RWSet1, AddTokens =/= [] orelse RemoveTokens =/= []],
+    {ok, RWSet2}.
 
 %% @private apply a list of downstream ops to a given orset
 apply_downstreams([], RWSet) ->
@@ -373,5 +375,24 @@ prop4_test() ->
   ?assertEqual([a], value(Set2a)),
   ?assertEqual([], value(Set3a)),
   ?assertEqual([a], value(Set2b)).
+
+  prop5_test() ->
+  Set0 = new(),
+  % DC2 add a
+  {ok, Add2Effect} = downstream({add, a}, Set0),
+  {ok, Set2a} = update(Add2Effect, Set0),
+  % DC3 reset
+  {ok, Reset2Effect} = downstream({reset, {}}, Set2a),
+  {ok, Set2b} = update(Reset2Effect, Set2a),
+
+  io:format("Reset2Effect = ~p~n", [Reset2Effect]),
+  io:format("Add2Effect = ~p~n", [Add2Effect]),
+
+  io:format("Set2a = ~p~n", [Set2a]),
+  io:format("Set2b = ~p~n", [Set2b]),
+
+  ?assertEqual([a], value(Set2a)),
+  ?assertEqual([], Set2b),
+  ?assertEqual([], value(Set2b)).
 
 -endif.
