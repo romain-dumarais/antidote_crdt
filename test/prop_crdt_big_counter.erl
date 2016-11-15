@@ -34,15 +34,11 @@ prop_big_counter_spec() ->
 big_counter_spec(Operations1) ->
   Operations = crdt_properties:filter_resets(Operations1),
   lists:sum([X || {_, {increment, X}} <- Operations])
-    + lists:sum([1 || {_, increment} <- Operations])
-    - lists:sum([X || {_, {decrement, X}} <- Operations])
-    - lists:sum([1 || {_, decrement} <- Operations]).
+    - lists:sum([X || {_, {decrement, X}} <- Operations]).
 
 % generates a random counter operation
 big_counter_op() ->
   oneof([
-    increment,
-    decrement,
     {increment, integer()},
     {decrement, integer()},
     {reset, {}}

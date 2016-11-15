@@ -43,9 +43,7 @@
 -type uniqueToken() :: term().
 -type state() :: [{integer(), uniqueToken()}].
 -type op() ::
-      increment
-    | {increment, integer()}
-    | decrement
+    {increment, integer()}
     | {decrement, integer()}
     | reset.
 -type effect() ::
@@ -68,10 +66,6 @@ value(BigCounter) ->
 downstream(Op, BigCtr) ->
     Token = unique(),
     case Op of
-        increment ->
-            {ok, {1, Token}};
-        decrement ->
-            {ok, {-1, Token}};
         {increment, Value} when is_integer(Value) ->
             {ok, {Value, Token}};
         {decrement, Value} when is_integer(Value) ->
@@ -127,8 +121,6 @@ is_bottom(BigCtr) ->
 %% @doc The following operation verifies
 %%      that Operation is supported by this particular CRDT.
 -spec is_operation(term()) -> boolean().
-is_operation(increment) -> true;
-is_operation(decrement) -> true;
 is_operation({increment, Value}) when is_integer(Value) -> true;
 is_operation({decrement, Value}) when is_integer(Value)-> true;
 is_operation({reset, {}}) -> true;
