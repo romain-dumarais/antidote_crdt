@@ -39,9 +39,7 @@ spec(Operations1, Value) ->
     fun({{Key,Type},Ops}) ->
       ?WHENFAIL(
         begin
-          io:format("~n~nOperations1 = ~p~n", [Operations1]),
-          io:format("Operations = ~p~n", [Operations]),
-          io:format("GroupedByKey = ~p~n", [GroupedByKey])
+          io:format("Operations on Key ~p: ~p~n", [{Key,Type}, Ops])
         end,
         nestedSpec(Type, Ops, antidote_crdt_map_x:get({Key,Type}, Value))
       )
