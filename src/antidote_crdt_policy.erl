@@ -146,6 +146,53 @@ is_bottom(State) -> State == new().
 
 
 %% ===================================================================
+%% Private API
+%% ===================================================================
+%% following code was created by mweber on github :
+%% https://github.com/mweberUKL/antidote/blob/acgregate_integration/src/crdt_policy.erl
+%% sets rights changing
+
+% % Private
+% %-spec add_right(right(), binary(), policy()) -> {ok, policy()}.
+% add_right(Right, Token, Policy) ->
+%     case orddict:find(Right, Policy) of
+%         {ok, Tokens} ->
+%             case lists:member(Token, Tokens) of
+%                 true ->
+%                     {ok, Policy};
+%                 false ->
+%                     {ok, orddict:store(Right, Tokens++[Token], Policy)}
+%             end;
+%         error ->
+%             {ok, orddict:store(Right, [Token], Policy)}
+%     end.
+
+% %-spec remove_right(right(), [binary()], policy()) -> policy().
+% remove_right(Right, RemoveTokens, Policy) ->
+%     case orddict:find(Right, Policy) of
+%         {ok, Tokens} ->
+%             RestTokens = Tokens--RemoveTokens,
+%             case RestTokens of
+%                 [] ->
+%                     orddict:erase(Right, Policy);
+%                 _ ->
+%                     orddict:store(Right, RestTokens, Policy)
+%             end;
+%         error ->
+%             Policy % if the right is not in the policy anymore, it was already removed by a different policy change
+%     end.
+
+% %-spec remove_rights(orddict:orddict(), policy()) -> policy().
+% remove_rights(Orddict, Policy) ->
+%     orddict:fold(fun(Right, Tokens, Res) ->
+%                    remove_right(Right, Tokens, Res)
+%                  end, Policy, Orddict).
+
+% %-spec unique(actor()) -> binary().
+% unique(_Actor) ->
+% crypto:strong_rand_bytes(20).
+
+%% ===================================================================
 %% EUnit tests
 %% ===================================================================
 -ifdef(TEST).
