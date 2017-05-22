@@ -126,7 +126,7 @@ equal(Policy1, Policy2) ->
 to_binary(Policy) ->
     <<?TAG:8/integer, ?V1_VERS:8/integer, (term_to_binary(Policy))/binary>>.
 
-%% @doc Decode binary `mvreg()'
+%% @doc Decode binary `policy()'
 -spec from_binary(binary()) -> {ok, policy()} | {error, term()}.
 from_binary(<<?TAG:8/integer, ?V1_VERS:8/integer, Bin/binary>>) ->
     {ok, riak_dt:from_binary(Bin)}.
@@ -151,6 +151,22 @@ is_bottom(State) -> State == new().
 %% following code was created by mweber on github :
 %% https://github.com/mweberUKL/antidote/blob/acgregate_integration/src/crdt_policy.erl
 %% sets rights changing
+%%
+%% description of acgregate :
+%% An operation-based Security Policy implementation
+%% As the data structure is operation-based, to issue an operation, one should
+%% firstly call `generate_downstream/3' to get the downstream version of the
+%% operation and then call `update/2'.
+%%
+%% It provides an operation set_right to update the right. Concurrent updates
+%% lead to multiple versions of the policy. When querying the policy for the
+%% current value with get_right, the minimum of the concurrently assigned rights
+%% is returned.
+%%
+%% In the commented implementation, the rights are modeled as sets of arbitrary
+%% elements. In the most basic version, sets of atoms are used, where each atom
+%% represents an operation which may be performed. The minimum is computed as
+%% the intersection of these sets.
 
 % % Private
 % %-spec add_right(right(), binary(), policy()) -> {ok, policy()}.
@@ -201,6 +217,19 @@ upd(Update, State) ->
     {ok, Downstream} = downstream(Update, State),
     {ok, Res} = update(Downstream, State),
     Res.
+
+set_test() ->
+    Policy1 = new(),
+    {ok, DownstreamOp1} = generate_downstream({set_right, ordsets:from_list([read])}, 1, Policy1),
+    ?assertMatch({set_right, [read], _, _}, DownstreamOp1),
+    {ok, DownstreamOp2} = generate_downstream({set_right, ordsets:from_list([read, write])}, 1, Policy1),
+    ?assertMatch({set_right, [read, write], _, _}, DownstreamOp2),
+    {ok, Policy2} = update(DownstreamOp1, Policy1),
+    {_, Right1, _, _} = DownstreamOp1,
+    ?assertEqual([Right1], orddict:fetch_keys(Policy2)),
+    {ok, Policy3} = update(DownstreamOp2, Policy1),
+    {_, Right2, _, _} = DownstreamOp2,
+    ?assertEqual([Right2], orddict:fetch_keys(Policy3)).
 
 reset_test() ->
     R1 = new(),
